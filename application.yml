@@ -1,0 +1,13 @@
+leader:
+  jwt-secret: 'q34i27nrwkeldqoc827rjgyxq423fq5bitwgfuoy4t3biqcoqx24tdr7buhfgo38cn2i34nbyc79g3xd3sc'
+
+server:
+  port: 9082
+
+mongo:
+  host: localhost
+  port: 27017
+  username: leader_mc_test
+  authentication-database: admin
+  password: BPomrw5EB1lV3OkQ
+  repository-database: leader_mc_test
