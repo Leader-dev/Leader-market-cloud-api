@@ -1,14 +1,28 @@
 package com.leader.marketcloudapi.service.project
 
 import com.leader.marketcloudapi.data.project.*
+import com.leader.marketcloudapi.util.InternalErrorException
+import com.leader.marketcloudapi.util.component.DateUtil
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
 class ProjectService @Autowired constructor(
-    private val projectRepository: ProjectRepository
+    private val projectRepository: ProjectRepository,
+    private val dateUtil: DateUtil
 ) {
+
+    private fun copyProjectInfo(source: Project, target: Project) {
+        target.status = source.status
+        target.title = source.title
+        target.tags = source.tags
+        target.content = source.content
+        target.startDate = source.startDate
+        target.endDate = source.endDate
+        target.coverUrl = source.coverUrl
+        target.imageUrls = source.imageUrls
+    }
 
     fun getProjects(): List<ProjectOverview> {
         return projectRepository.lookupAll()
@@ -38,13 +52,25 @@ class ProjectService @Autowired constructor(
     }
 
     fun publishProject(publisherAgentId: ObjectId, project: Project) {
-        project.publisherAgentId = publisherAgentId
-        projectRepository.save(project)
+        val newProject = Project()
+        newProject.publisherAgentId = publisherAgentId
+        copyProjectInfo(project, newProject)
+        if (!project.draft) {
+            newProject.publishDate = dateUtil.getCurrentDate()
+        }
+        newProject.updateDate = dateUtil.getCurrentDate()
+        projectRepository.insert(newProject)
     }
 
     fun updateProject(agentId: ObjectId, project: Project) {
-        // TODO lookup project by id and check if agentId is the same as the one in the project
-        projectRepository.save(project)
+        val existingProject = projectRepository.findByPublisherAgentIdAndId(agentId, project.id)
+            ?: throw InternalErrorException("Project not found")
+        copyProjectInfo(project, existingProject)
+        if (!project.draft) {
+            existingProject.publishDate = dateUtil.getCurrentDate()
+        }
+        existingProject.updateDate = dateUtil.getCurrentDate()
+        projectRepository.save(existingProject)
     }
 
     fun deleteProject(publisherAgentId: ObjectId, projectId: ObjectId) {

@@ -20,12 +20,15 @@ class Project {
     lateinit var status: String
     var draft: Boolean = true
     var readCount: Int = 0
-    var publishDate: Date? = null
-    var updateDate: Date? = null
+    lateinit var publishDate: Date
+    lateinit var updateDate: Date
 
     lateinit var title: String
     lateinit var tags: MutableList<String>
     lateinit var content: String
+
+    lateinit var startDate: Date
+    lateinit var endDate: Date
 
     lateinit var coverUrl: String
     lateinit var imageUrls: String
@@ -43,12 +46,15 @@ class ProjectOverview {
     lateinit var status: String
     var draft: Boolean = true
     var readCount: Int = 0
-    var publishDate: Date? = null
-    var updateDate: Date? = null
+    lateinit var publishDate: Date
+    lateinit var updateDate: Date
 
     lateinit var title: String
     lateinit var tags: MutableList<String>
     lateinit var content: String
+
+    lateinit var startDate: Date
+    lateinit var endDate: Date
 
     lateinit var coverUrl: String
 }
@@ -65,12 +71,15 @@ class ProjectDetail {
     lateinit var status: String
     var draft: Boolean = true
     var readCount: Int = 0
-    var publishDate: Date? = null
-    var updateDate: Date? = null
+    lateinit var publishDate: Date
+    lateinit var updateDate: Date
 
     lateinit var title: String
     lateinit var tags: MutableList<String>
     lateinit var content: String
+
+    lateinit var startDate: Date
+    lateinit var endDate: Date
 
     lateinit var coverUrl: String
     lateinit var imageUrls: String
@@ -92,6 +101,8 @@ interface ProjectRepository : MongoRepository<Project, ObjectId> {
     fun findByOrgId(orgId: ObjectId): List<Project>
 
     fun findByPublisherAgentId(publisherAgentId: ObjectId): List<Project>
+
+    fun findByPublisherAgentIdAndId(publisherAgentId: ObjectId, id: ObjectId): Project?
 
     fun deleteByPublisherAgentIdAndId(publisherAgentId: ObjectId, id: ObjectId)
 }
