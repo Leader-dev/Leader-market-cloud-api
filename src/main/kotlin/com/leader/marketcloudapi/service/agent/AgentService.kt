@@ -1,6 +1,7 @@
 package com.leader.marketcloudapi.service.agent
 
 import com.leader.marketcloudapi.data.agent.*
+import com.leader.marketcloudapi.util.InternalErrorException
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -36,26 +37,30 @@ class AgentService @Autowired constructor(
         return agentRepository.findByUserId(userId)
     }
 
+    fun getAgentInfoByUserIdForce(userId: ObjectId): Agent {
+        return agentRepository.findByUserId(userId) ?: throw InternalErrorException("Agent not found")
+    }
+
     fun getAgentIdByUserId(userId: ObjectId): ObjectId? {
         val agent = getAgentInfoByUserId(userId) ?: return null
         return agent.id
     }
 
     fun updateAgentInfoByUserId(userId: ObjectId, agentInfo: Agent) {
-        val agent = getAgentInfoByUserId(userId)
-        copyAgent(agent!!, agentInfo)
+        val agent = getAgentInfoByUserIdForce(userId)
+        copyAgent(agent, agentInfo)
         agentRepository.save(agent)
     }
 
     fun updateAgentOrgIdByUserId(userId: ObjectId, orgId: ObjectId) {
-        val agent = getAgentInfoByUserId(userId)
-        agent!!.orgId = orgId
+        val agent = getAgentInfoByUserIdForce(userId)
+        agent.orgId = orgId
         agentRepository.save(agent)
     }
 
     fun updateAgentAvatarUrlByUserId(userId: ObjectId, avatarUrl: String) {
-        val agent = getAgentInfoByUserId(userId)
-        agent!!.avatarUrl = avatarUrl
+        val agent = getAgentInfoByUserIdForce(userId)
+        agent.avatarUrl = avatarUrl
         agentRepository.save(agent)
     }
 

@@ -4,7 +4,6 @@ import com.leader.marketcloudapi.data.agent.Agent
 import com.leader.marketcloudapi.mq.ImageInfoMessageQueue
 import com.leader.marketcloudapi.service.agent.AgentService
 import com.leader.marketcloudapi.service.context.ContextService
-import com.leader.marketcloudapi.service.org.OrgMemberService
 import com.leader.marketcloudapi.util.InternalErrorException
 import com.leader.marketcloudapi.util.isRequiredArgument
 import com.leader.marketcloudapi.util.success
@@ -39,7 +38,7 @@ class AgentManageController @Autowired constructor(
     @PostMapping("/info")
     fun getAgentInfo(): Document {
         val userId = contextService.userId  // use user id for performance
-        val agentInfo = agentService.getAgentInfoByUserId(userId)!!
+        val agentInfo = agentService.createIfNotExists(userId)
         return success("info", agentInfo)
     }
 
@@ -65,12 +64,16 @@ class AgentManageController @Autowired constructor(
     @PostMapping("/info/update/avatarUrl")
     fun updateAgentAvatar(@RequestBody queryObject: QueryObject): Document {
         val avatarUrl = queryObject.avatarUrl.isRequiredArgument("avatarUrl")
+
         imageInfoMessageQueue.assertImagesUploaded(listOf(avatarUrl))
 
         val userId = contextService.userId  // use user id for performance
+        val originalAvatarUrl = agentService.getAgentInfoByUserIdForce(userId).avatarUrl
         agentService.updateAgentAvatarUrlByUserId(userId, avatarUrl)
 
+        imageInfoMessageQueue.deleteImages(listOf(originalAvatarUrl))
         imageInfoMessageQueue.confirmImagesUploaded(listOf(avatarUrl))
+
         return success()
     }
 }

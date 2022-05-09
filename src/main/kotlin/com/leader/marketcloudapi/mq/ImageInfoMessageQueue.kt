@@ -35,4 +35,12 @@ class ImageInfoMessageQueue @Autowired constructor(
             throw InternalErrorException("Failed to confirm images uploaded.")
         }
     }
+
+    fun deleteImages(imageUrls: List<String>) {
+        val reply = amqpTemplate.convertSendAndReceive(IMAGE_UPLOADED, Document("operation", "delete").append("imageUrls", imageUrls))
+                as? Boolean ?: throw IllegalStateException("Failed to receive response from image-service.")
+        if (!reply) {
+            throw InternalErrorException("Failed to delete images.")
+        }
+    }
 }
