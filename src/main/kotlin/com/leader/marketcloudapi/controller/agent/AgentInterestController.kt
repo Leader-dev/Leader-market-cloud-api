@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/agents/interests")
+@RequestMapping("/agent/interest")
 class AgentInterestController @Autowired constructor(
     private val agentInterestService: AgentInterestService,
     private val contextService: ContextService

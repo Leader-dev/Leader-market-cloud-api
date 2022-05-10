@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/agents/favorites")
+@RequestMapping("/agent/favorite")
 class AgentFavoriteController @Autowired constructor(
     private val agentFavoriteService: AgentFavoriteService,
     private val contextService: ContextService
