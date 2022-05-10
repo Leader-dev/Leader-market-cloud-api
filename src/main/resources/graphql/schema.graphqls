@@ -1,0 +1,142 @@
+type Agent {
+    id: String!
+    name: String!
+    description: String!
+    avatarUrl: String!
+    showContact: Boolean!
+    phone: String
+    email: String
+    orgId: String
+    orgInfo: Organization
+    projectCount: Int
+    readCount: Int
+    favorited: Boolean
+}
+
+type Organization {
+    id: String!
+    name: String!
+    description: String!
+    avatarUrl: String!
+    certification: String!
+}
+
+type Project {
+    id: String!
+    title: String!
+    coverUrl: String!
+    content: String!
+    imageUrls: [String!]!
+    startDate: String
+    endDate: String
+    orgId: String!
+    orgInfo: Organization!
+    publisherAgentId: String!
+    publisherAgentInfo: Agent!
+    status: String!
+    createdAt: String!
+    updatedAt: String!
+    readCount: Int!
+    draft: Boolean!
+}
+
+type CurrentAgentQuery {
+    info: Agent
+    orgs: [Organization!]!
+    projects: [Project!]!
+    drafts: [Project!]!
+    favorites: [Agent!]!
+    interests: [Agent!]!
+    beingInterested: [Agent!]!
+}
+
+type AgentQuery {
+    all: [Agent!]!
+    byId(id: String!): Agent
+}
+
+type OrgQuery {
+    all: [Organization!]!
+    byId(id: String!): Organization
+    isMember(orgId: String!): Boolean!
+    isAdmin(orgId: String!): Boolean!
+}
+
+type ProjectQuery {
+    all: [Project!]!
+    byId(id: String!): Project
+    byAgentId(agentId: String!): [Project!]!
+    byOrgId(orgId: String!): [Project!]!
+}
+
+type Query {
+    currentAgent: CurrentAgentQuery!
+    agent: AgentQuery!
+    organization: OrgQuery!
+    project: ProjectQuery!
+}
+
+input AgentInfo {
+    name: String!
+    description: String!
+    avatarUrl: String!
+    showContact: Boolean!
+    phone: String
+    email: String
+    showOrgId: String
+}
+
+type CurrentAgentMutation {
+    updateInfo(agent: AgentInfo): Boolean!
+    updateOrgId(orgId: String): Boolean!
+    updateAvatar(avatarUrl: String): Boolean!
+    addFavorite(agentId: String): Boolean!
+    removeFavorite(agentId: String): Boolean!
+    sendInterest(agentId: String): Boolean!
+}
+
+input OrgInfo {
+    name: String!
+    description: String!
+    avatarUrl: String!
+}
+
+type CodeInfo {
+    type: String!
+    orgId: String!
+}
+
+type OrgMutation {
+    create(info: OrgInfo): Organization!
+    update(info: OrgInfo): Boolean!
+    updateAvatar(avatarUrl: String): Boolean!
+    getJoinCode(orgId: String): String!
+    getAdminTransferCode(orgId: String): String!
+    getCodeInfo(opcode: String): CodeInfo!
+    joinOrganization(opcode: String): Boolean!
+    claimOrganization(opcode: String): Boolean!
+}
+
+input ProjectInfo {
+    title: String!
+    coverUrl: String!
+    content: String!
+    imageUrls: [String!]!
+    startDate: String
+    endDate: String
+    status: String!
+    draft: Boolean!
+}
+
+type ProjectMutation {
+    read(projectId: String): Boolean!
+    publish(project: ProjectInfo): Boolean!
+    update(project: ProjectInfo): Boolean!
+    delete(projectId: String): Boolean!
+}
+
+type Mutation {
+    currentAgent: CurrentAgentMutation!
+    organization: OrgMutation!
+    project: ProjectMutation!
+}

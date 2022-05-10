@@ -63,7 +63,7 @@ interface AgentRepository : MongoRepository<Agent, ObjectId> {
         "{ \$match: ?0 }",
         "{ \$lookup: { from: 'org_list', localField: 'orgId', foreignField: '_id', as: 'orgInfo' } }",
         "{ \$lookup: { from: 'project_list', localField: 'id', foreignField: 'publisherAgentId', as: 'projects' } }",
-        "{ \$unwind: '\$orgInfo' }",
+        "{ \$unwind: { path: '\$orgInfo', preserveNullAndEmptyArrays: true } }",
     ])
     fun lookupByQuery(query: org.bson.Document): List<AgentSummary>
 }

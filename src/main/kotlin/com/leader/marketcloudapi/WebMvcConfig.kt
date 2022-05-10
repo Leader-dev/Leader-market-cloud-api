@@ -9,10 +9,13 @@ import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageConverter
+import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.stereotype.Component
@@ -26,6 +29,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+
 
 @Configuration
 @EnableWebMvc
@@ -118,11 +122,12 @@ class WebMvcConfig @Autowired constructor(
         return ResponseEntity(internalError(ex.message), HttpStatus.OK)
     }
 
-    override fun configureMessageConverters(converters: MutableList<HttpMessageConverter<*>?>) {
+    override fun extendMessageConverters(converters: MutableList<HttpMessageConverter<*>>) {
         // whenever a ObjectId object is encountered in response, convert it to hex string (toString() function does this)
         val builder = Jackson2ObjectMapperBuilder()
             .serializerByType(ObjectId::class.java, ToStringSerializer())
         val converter = MappingJackson2HttpMessageConverter(builder.build())
+        converters.removeIf { it is MappingJackson2HttpMessageConverter }  // remove original converter
         converters.add(converter)
     }
 }

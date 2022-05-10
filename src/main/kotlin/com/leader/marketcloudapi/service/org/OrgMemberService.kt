@@ -30,6 +30,11 @@ class OrgMemberService @Autowired constructor(
         }
     }
 
+    fun isAdminOf(orgId: ObjectId, agentId: ObjectId): Boolean {
+        val memberId = getMemberId(orgId, agentId) ?: return false
+        return orgMemberRepository.existsByIdAndRolesContaining(memberId, ADMIN_ROLE_NAME)
+    }
+
     fun isAdmin(memberId: ObjectId): Boolean {
         return orgMemberRepository.existsByIdAndRolesContaining(memberId, ADMIN_ROLE_NAME)
     }

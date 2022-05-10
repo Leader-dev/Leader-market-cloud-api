@@ -3,6 +3,19 @@ leader:
 
 server:
   port: 9082
+  servlet:
+    context-path: /mc
+
+spring:
+  graphql:
+    cors:
+      allowed-origins: '*'
+      allowed-methods: GET, POST
+    graphiql:
+      enabled: true
+    schema:
+      printer:
+        enabled: true
 
 mongo:
   host: localhost

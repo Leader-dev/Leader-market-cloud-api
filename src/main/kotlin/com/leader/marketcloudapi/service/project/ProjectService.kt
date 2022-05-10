@@ -44,14 +44,17 @@ class ProjectService @Autowired constructor(
         return projectRepository.lookupById(projectId)
     }
 
-    fun incrementReadCount(projectId: ObjectId) {
+    fun incrementReadCount(projectId: ObjectId): Int {
+        var newReadCount = 0
         projectRepository.findById(projectId).ifPresent {
             it.readCount++
+            newReadCount = it.readCount
             projectRepository.save(it)
         }
+        return newReadCount
     }
 
-    fun publishProject(publisherAgentId: ObjectId, project: Project) {
+    fun publishProject(publisherAgentId: ObjectId, project: Project): Project {
         val newProject = Project()
         newProject.publisherAgentId = publisherAgentId
         copyProjectInfo(project, newProject)
@@ -60,9 +63,10 @@ class ProjectService @Autowired constructor(
         }
         newProject.updateDate = dateUtil.getCurrentDate()
         projectRepository.insert(newProject)
+        return newProject
     }
 
-    fun updateProject(agentId: ObjectId, project: Project) {
+    fun updateProject(agentId: ObjectId, project: Project): Project {
         val existingProject = projectRepository.findByPublisherAgentIdAndId(agentId, project.id)
             ?: throw InternalErrorException("Project not found")
         copyProjectInfo(project, existingProject)
@@ -71,6 +75,7 @@ class ProjectService @Autowired constructor(
         }
         existingProject.updateDate = dateUtil.getCurrentDate()
         projectRepository.save(existingProject)
+        return existingProject
     }
 
     fun deleteProject(publisherAgentId: ObjectId, projectId: ObjectId) {
