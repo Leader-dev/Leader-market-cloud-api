@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.repository.MongoRepository
 class OrgMember {
 
     companion object {
-        const val MANAGER = "manager"
+        const val ADMIN = "admin"
     }
 
     @Id

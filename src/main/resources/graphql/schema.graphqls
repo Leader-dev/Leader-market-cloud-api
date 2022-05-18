@@ -19,6 +19,8 @@ type Organization {
     description: String!
     avatarUrl: String!
     certification: String!
+    memberCount: Int!
+    projectCount: Int!
 }
 
 type Project {
@@ -60,6 +62,7 @@ type OrgQuery {
     byId(id: String!): Organization
     isMember(orgId: String!): Boolean!
     isAdmin(orgId: String!): Boolean!
+    members(orgId: String!): [Agent!]!
 }
 
 type ProjectQuery {

@@ -31,7 +31,7 @@ class Project {
     lateinit var endDate: Date
 
     lateinit var coverUrl: String
-    lateinit var imageUrls: String
+    lateinit var imageUrls: MutableList<String>
 }
 
 class ProjectOverview {
@@ -82,7 +82,7 @@ class ProjectDetail {
     lateinit var endDate: Date
 
     lateinit var coverUrl: String
-    lateinit var imageUrls: String
+    lateinit var imageUrls: MutableList<String>
 }
 
 interface ProjectRepository : MongoRepository<Project, ObjectId> {

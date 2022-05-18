@@ -1,6 +1,6 @@
 package com.leader.marketcloudapi.graphql.org
 
-import com.leader.marketcloudapi.data.org.Organization
+import com.leader.marketcloudapi.data.org.OrgSummary
 import com.leader.marketcloudapi.service.org.OrganizationService
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,8 +14,8 @@ class GOrganizationController @Autowired constructor(
 ) {
 
     @SchemaMapping(typeName = "OrgQuery")
-    fun all(): List<Organization> = orgService.listOrganizations()
+    fun all(): List<OrgSummary> = orgService.listOrganizations()
 
     @SchemaMapping(typeName = "OrgQuery")
-    fun byId(@Argument id: ObjectId): Organization? = orgService.getOrganization(id)
+    fun byId(@Argument id: ObjectId): OrgSummary? = orgService.getOrganization(id)
 }

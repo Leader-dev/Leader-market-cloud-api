@@ -21,8 +21,13 @@ class AgentController @Autowired constructor(
         val agentId: ObjectId? = null
     }
 
-    @PostMapping("/list")
+    @PostMapping("/list/all")
     fun getAllAgents(): Document {
+        return success("list", agentService.listAgents())
+    }
+
+    @PostMapping("/list/org")
+    fun getAgentsByOrg(): Document {
         return success("list", agentService.listAgents())
     }
 

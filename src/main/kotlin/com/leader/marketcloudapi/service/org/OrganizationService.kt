@@ -1,7 +1,6 @@
 package com.leader.marketcloudapi.service.org
 
-import com.leader.marketcloudapi.data.org.Organization
-import com.leader.marketcloudapi.data.org.OrganizationRepository
+import com.leader.marketcloudapi.data.org.*
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -14,11 +13,12 @@ class OrganizationService @Autowired constructor(
     private fun copyValidFieldsTo(target: Organization, source: Organization) {
         target.name = source.name
         target.description = source.description
+        target.slogan = source.slogan
     }
 
-    fun listOrganizations(): List<Organization> = orgRepository.findAll()
+    fun listOrganizations(): List<OrgSummary> = orgRepository.lookupAll()
 
-    fun getOrganization(id: ObjectId): Organization? = orgRepository.findById(id).orElse(null)
+    fun getOrganization(id: ObjectId): OrgSummary? = orgRepository.lookupById(id)
 
     fun createOrganization(org: Organization): Organization {
         val newOrg = Organization()

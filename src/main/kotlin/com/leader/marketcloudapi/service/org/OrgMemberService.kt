@@ -17,7 +17,7 @@ class OrgMemberService @Autowired constructor(
 ) {
 
     companion object {
-        const val ADMIN_ROLE_NAME = "admin"
+        const val ADMIN_ROLE_NAME = OrgMember.ADMIN
     }
 
     fun isMemberOf(orgId: ObjectId, agentId: ObjectId): Boolean {
@@ -31,15 +31,20 @@ class OrgMemberService @Autowired constructor(
     }
 
     fun isAdminOf(orgId: ObjectId, agentId: ObjectId): Boolean {
-        val memberId = getMemberId(orgId, agentId) ?: return false
-        return orgMemberRepository.existsByIdAndRolesContaining(memberId, ADMIN_ROLE_NAME)
+        return isAdmin(getMemberId(orgId, agentId))
     }
 
-    fun isAdmin(memberId: ObjectId): Boolean {
-        return orgMemberRepository.existsByIdAndRolesContaining(memberId, ADMIN_ROLE_NAME)
+    fun assertIsAdminOf(orgId: ObjectId, agentId: ObjectId) {
+        if (!isAdminOf(orgId, agentId)) {
+            throw InternalErrorException("Agent is not an admin of the organization.")
+        }
     }
 
-    fun assertIsAdmin(memberId: ObjectId) {
+    fun isAdmin(memberId: ObjectId?): Boolean {
+        return orgMemberRepository.existsByIdAndRolesContaining(memberId ?: return false, ADMIN_ROLE_NAME)
+    }
+
+    fun assertIsAdmin(memberId: ObjectId?) {
         if (!isAdmin(memberId)) {
             throw InternalErrorException("Agent is not an admin of the organization.")
         }

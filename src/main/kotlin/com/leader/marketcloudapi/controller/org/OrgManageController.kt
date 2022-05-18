@@ -76,6 +76,18 @@ class OrgManageController @Autowired constructor(
         return success("list", orgList)
     }
 
+    @PostMapping("/members")
+    fun listMembers(): Document {
+        val orgId = contextService.orgId
+        val agentId = contextService.agentId
+
+        orgMemberService.assertIsAdminOf(orgId, agentId)
+
+        val agentList = orgMemberService.getOrgMembers(orgId)
+
+        return success("members", agentList)
+    }
+
     @PostMapping("/update")
     fun update(@RequestBody queryObject: QueryObject): Document {
         val memberId = contextService.memberId

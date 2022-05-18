@@ -1,5 +1,6 @@
 package com.leader.marketcloudapi.graphql.org
 
+import com.leader.marketcloudapi.data.agent.Agent
 import com.leader.marketcloudapi.data.org.Organization
 import com.leader.marketcloudapi.service.context.ContextService
 import com.leader.marketcloudapi.service.org.OrgMemberService
@@ -25,6 +26,15 @@ class GOrgManageController @Autowired constructor(
     @SchemaMapping(typeName = "OrgQuery")
     fun isAdmin(@Argument orgId: ObjectId): Boolean =
         contextService.hasUserId && orgMemberService.isAdminOf(orgId, contextService.agentId)
+
+    @SchemaMapping(typeName = "OrgQuery")
+    fun members(@Argument orgId: ObjectId): List<Agent> {
+        val agentId = contextService.agentId
+
+        orgMemberService.assertIsAdminOf(orgId, agentId)
+
+        return orgMemberService.getOrgMembers(orgId)
+    }
 
     @SchemaMapping(typeName = "OrgMutation")
     fun create(@Argument info: Organization): Organization {
