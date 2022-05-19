@@ -14,7 +14,7 @@ class Project {
 
     @Id
     lateinit var id: ObjectId
-    lateinit var orgId: ObjectId
+    var orgId: ObjectId? = null
     lateinit var publisherAgentId: ObjectId
 
     lateinit var status: String
@@ -38,8 +38,8 @@ class ProjectOverview {
 
     @Id
     lateinit var id: ObjectId
-    lateinit var orgId: ObjectId
-    lateinit var orgInfo: Organization
+    var orgId: ObjectId? = null
+    var orgInfo: Organization? = null
     lateinit var publisherAgentId: ObjectId
     lateinit var publisherAgentInfo: Agent
 
@@ -63,8 +63,8 @@ class ProjectDetail {
 
     @Id
     lateinit var id: ObjectId
-    lateinit var orgId: ObjectId
-    lateinit var orgInfo: Organization
+    var orgId: ObjectId? = null
+    var orgInfo: Organization? = null
     lateinit var publisherAgentId: ObjectId
     lateinit var publisherAgentInfo: Agent
 
