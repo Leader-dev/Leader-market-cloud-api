@@ -91,8 +91,8 @@ interface ProjectRepository : MongoRepository<Project, ObjectId> {
         "{ \$match: ?0 }",
         "{ \$lookup: { from: 'org_list', localField: 'orgId', foreignField: '_id', as: 'orgInfo' } }",
         "{ \$lookup: { from: 'agent_list', localField: 'publisherAgentId', foreignField: '_id', as: 'publisherAgentInfo' } }",
-        "{ \$unwind: '\$orgInfo' }",
-        "{ \$unwind: '\$publisherAgentInfo' }"
+        "{ \$unwind: { path: '\$orgInfo', preserveNullAndEmptyArrays: true} }",
+        "{ \$unwind: { path: '\$publisherAgentInfo', preserveNullAndEmptyArrays: true } }"
     ])
     fun <T> lookupByQuery(query: org.bson.Document, type: Class<T>): List<T>
 
