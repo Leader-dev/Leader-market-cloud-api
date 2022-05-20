@@ -14,7 +14,9 @@ class ProjectService @Autowired constructor(
 ) {
 
     private fun copyProjectInfo(source: Project, target: Project) {
+        target.orgId = source.orgId
         target.status = source.status
+        target.draft = source.draft
         target.title = source.title
         target.tags = source.tags
         target.content = source.content
