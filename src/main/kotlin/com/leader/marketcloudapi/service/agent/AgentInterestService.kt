@@ -19,6 +19,8 @@ class AgentInterestService @Autowired constructor(
     }
 
     fun sendInterest(agentId: ObjectId, interestAgentId: ObjectId) {
-        agentInterestRepository.save(AgentInterest(agentId, interestAgentId))
+        if (!agentInterestRepository.existsByAgentIdAndInterestAgentId(agentId, interestAgentId)) {
+            agentInterestRepository.save(AgentInterest(agentId, interestAgentId))
+        }
     }
 }

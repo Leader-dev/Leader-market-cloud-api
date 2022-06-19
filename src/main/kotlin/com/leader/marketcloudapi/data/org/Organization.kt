@@ -37,9 +37,8 @@ interface OrganizationRepository : MongoRepository<Organization, ObjectId> {
     @Aggregation(pipeline = [
         "{ \$match: ?0 }",
         "{ \$lookup: { from: 'org_members', localField: '_id', foreignField: 'orgId', as: 'members' } }",
-        "{ \$addFields: { memberCount: { \$size: '\$members' } } }",
         "{ \$lookup: { from: 'project_list', localField: '_id', foreignField: 'orgId', as: 'projects' } }",
-        "{ \$addFields: { projectCount: { \$size: '\$projects' } } }",
+        "{ \$addFields: { projectCount: { \$size: '\$projects' }, memberCount: { \$size: '\$members' } } }",
     ])
     fun lookupByQuery(query: org.bson.Document): List<OrgSummary>
 }

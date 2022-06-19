@@ -47,13 +47,11 @@ class ProjectService @Autowired constructor(
     }
 
     fun incrementReadCount(projectId: ObjectId): Int {
-        var newReadCount = 0
-        projectRepository.findById(projectId).ifPresent {
-            it.readCount++
-            newReadCount = it.readCount
-            projectRepository.save(it)
-        }
-        return newReadCount
+        val project = projectRepository.findById(projectId)
+            .orElseThrow { InternalErrorException("Project not found") }
+        project.readCount++
+        projectRepository.save(project)
+        return project.readCount
     }
 
     fun publishProject(publisherAgentId: ObjectId, project: Project): Project {

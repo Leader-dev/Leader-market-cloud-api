@@ -46,30 +46,33 @@ class AgentService @Autowired constructor(
         return agent.id
     }
 
-    fun updateAgentInfoByUserId(userId: ObjectId, agentInfo: Agent) {
+    fun updateAgentInfoByUserId(userId: ObjectId, agentInfo: Agent): Agent {
         val agent = getAgentInfoByUserIdForce(userId)
         copyAgent(agent, agentInfo)
         agentRepository.save(agent)
+        return agent
     }
 
-    fun updateAgentOrgIdByUserId(userId: ObjectId, orgId: ObjectId) {
+    fun updateAgentOrgIdByUserId(userId: ObjectId, orgId: ObjectId): Agent {
         val agent = getAgentInfoByUserIdForce(userId)
         agent.orgId = orgId
         agentRepository.save(agent)
+        return agent
     }
 
-    fun updateAgentAvatarUrlByUserId(userId: ObjectId, avatarUrl: String) {
+    fun updateAgentAvatarUrlByUserId(userId: ObjectId, avatarUrl: String): Agent {
         val agent = getAgentInfoByUserIdForce(userId)
         agent.avatarUrl = avatarUrl
         agentRepository.save(agent)
+        return agent
     }
 
-    fun listAgents(): List<AgentSummary> {
-        return agentRepository.lookupAll()
+    fun listAgents(userAgentId: ObjectId?): List<AgentSummary> {
+        return agentRepository.lookupAll(userAgentId)
     }
 
-    fun getAgentInfo(id: ObjectId): AgentSummary? {
-        return agentRepository.lookupById(id)
+    fun getAgentInfo(id: ObjectId, userAgentId: ObjectId?): AgentSummary? {
+        return agentRepository.lookupById(id, userAgentId)
     }
 
     fun getAgentDisplayOrgId(agentId: ObjectId): ObjectId? {

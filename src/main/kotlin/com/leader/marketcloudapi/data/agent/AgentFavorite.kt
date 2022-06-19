@@ -42,6 +42,11 @@ interface AgentFavoriteRepository : MongoRepository<AgentFavorite, ObjectId> {
         """,
         """
         {
+            ${"$"}unwind: "${"$"}agentInfo"
+        }
+        """,
+        """
+        {
             ${"$"}replaceRoot: { newRoot: '${"$"}agentInfo' }
         }
         """

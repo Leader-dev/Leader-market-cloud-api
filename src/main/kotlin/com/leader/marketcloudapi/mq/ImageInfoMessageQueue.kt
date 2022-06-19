@@ -20,6 +20,10 @@ class ImageInfoMessageQueue @Autowired constructor(
     @Bean
     fun imageUploadedQueue() = Queue(IMAGE_UPLOADED)
 
+    fun assertImageUploaded(imageUrl: String) {
+        assertImagesUploaded(listOf(imageUrl))
+    }
+
     fun assertImagesUploaded(imageUrls: List<String>) {
         val reply = amqpTemplate.convertSendAndReceive(IMAGE_UPLOADED, Document("operation", "assert").append("imageUrls", imageUrls))
                 as? Boolean ?: throw IllegalStateException("Failed to receive response from image-service.")
@@ -28,12 +32,20 @@ class ImageInfoMessageQueue @Autowired constructor(
         }
     }
 
+    fun confirmImageUploaded(imageUrl: String) {
+        confirmImagesUploaded(listOf(imageUrl))
+    }
+
     fun confirmImagesUploaded(imageUrls: List<String>) {
         val reply = amqpTemplate.convertSendAndReceive(IMAGE_UPLOADED, Document("operation", "confirm").append("imageUrls", imageUrls))
                 as? Boolean ?: throw IllegalStateException("Failed to receive response from image-service.")
         if (!reply) {
             throw InternalErrorException("Failed to confirm images uploaded.")
         }
+    }
+
+    fun deleteImage(imageUrl: String) {
+        deleteImages(listOf(imageUrl))
     }
 
     fun deleteImages(imageUrls: List<String>) {

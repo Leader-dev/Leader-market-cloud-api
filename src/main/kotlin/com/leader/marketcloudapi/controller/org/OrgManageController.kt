@@ -1,6 +1,7 @@
 package com.leader.marketcloudapi.controller.org
 
 import com.leader.marketcloudapi.data.org.Organization
+import com.leader.marketcloudapi.mq.ImageInfoMessageQueue
 import com.leader.marketcloudapi.service.context.ContextService
 import com.leader.marketcloudapi.service.org.OrgMemberService
 import com.leader.marketcloudapi.service.org.OrganizationService
@@ -20,13 +21,13 @@ import org.springframework.web.bind.annotation.RestController
 class OrgManageController @Autowired constructor(
     private val organizationService: OrganizationService,
     private val orgMemberService: OrgMemberService,
-    private val contextService: ContextService
+    private val contextService: ContextService,
+    private val imageInfoMessageQueue: ImageInfoMessageQueue
 ) {
 
     class QueryObject {
-        var ocode: String? = null
-        var expiresIn: Long? = null
         var info: Organization? = null
+        var avatarUrl: String? = null
     }
 
     @PostMapping("/roles")
@@ -64,7 +65,7 @@ class OrgManageController @Autowired constructor(
         val org = organizationService.createOrganization(info)
         orgMemberService.addAdmin(org.id, agentId)
 
-        return success("orgId", org.id)
+        return success("detail", organizationService.getOrganization(org.id))
     }
 
     @PostMapping("/list")
@@ -95,9 +96,28 @@ class OrgManageController @Autowired constructor(
 
         val orgId = contextService.orgId
         val info = queryObject.info.isRequiredArgument("info")
-        organizationService.updateOrganization(orgId, info)
+        val org = organizationService.updateOrganization(orgId, info)
 
-        return success()
+        return success("detail", organizationService.getOrganization(org.id))
+    }
+
+    @PostMapping("/update/avatar")
+    fun updateAvatar(@RequestBody queryObject: QueryObject): Document {
+        val memberId = contextService.memberId
+        orgMemberService.assertIsAdmin(memberId)
+
+        val avatarUrl = queryObject.avatarUrl.isRequiredArgument("avatarUrl")
+
+        imageInfoMessageQueue.assertImageUploaded(avatarUrl)
+
+        val orgId = contextService.orgId
+        val originalAvatarUrl = organizationService.getOrganizationForce(orgId).avatarUrl
+        val org = organizationService.updateOrganizationAvatar(orgId, avatarUrl)
+
+        imageInfoMessageQueue.deleteImage(originalAvatarUrl)
+        imageInfoMessageQueue.confirmImageUploaded(avatarUrl)
+
+        return success("detail", organizationService.getOrganization(org.id))
     }
 
     @PostMapping("/quit")

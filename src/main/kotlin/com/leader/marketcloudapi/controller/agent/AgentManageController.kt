@@ -4,6 +4,7 @@ import com.leader.marketcloudapi.data.agent.Agent
 import com.leader.marketcloudapi.mq.ImageInfoMessageQueue
 import com.leader.marketcloudapi.service.agent.AgentService
 import com.leader.marketcloudapi.service.context.ContextService
+import com.leader.marketcloudapi.service.org.OrgMemberService
 import com.leader.marketcloudapi.util.InternalErrorException
 import com.leader.marketcloudapi.util.isRequiredArgument
 import com.leader.marketcloudapi.util.success
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/agent/manage")
 class AgentManageController @Autowired constructor(
     private val agentService: AgentService,
+    private val orgMemberService: OrgMemberService,
     private val contextService: ContextService,
     private val imageInfoMessageQueue: ImageInfoMessageQueue
 ) {
@@ -46,8 +48,11 @@ class AgentManageController @Autowired constructor(
     fun updateAgentInfo(@RequestBody queryObject: QueryObject): Document {
         val info = queryObject.info.isRequiredArgument("info")
         val userId = contextService.userId  // use user id for performance
-        agentService.updateAgentInfoByUserId(userId, info)
-        return success()
+        info.orgId?.let {
+            orgMemberService.assertIsMember(it, contextService.agentId)
+        }
+        val agent = agentService.updateAgentInfoByUserId(userId, info)
+        return success("detail", agent)
     }
 
     @PostMapping("/info/update/orgId")
@@ -57,23 +62,23 @@ class AgentManageController @Autowired constructor(
         if (agentService.getAgentIdByUserId(userId) == null) {
             throw InternalErrorException("User not in organization.")
         }
-        agentService.updateAgentOrgIdByUserId(userId, orgId)
-        return success()
+        val agent = agentService.updateAgentOrgIdByUserId(userId, orgId)
+        return success("detail", agent)
     }
 
     @PostMapping("/info/update/avatarUrl")
     fun updateAgentAvatar(@RequestBody queryObject: QueryObject): Document {
         val avatarUrl = queryObject.avatarUrl.isRequiredArgument("avatarUrl")
 
-        imageInfoMessageQueue.assertImagesUploaded(listOf(avatarUrl))
+        imageInfoMessageQueue.assertImageUploaded(avatarUrl)
 
         val userId = contextService.userId  // use user id for performance
         val originalAvatarUrl = agentService.getAgentInfoByUserIdForce(userId).avatarUrl
-        agentService.updateAgentAvatarUrlByUserId(userId, avatarUrl)
+        val agent = agentService.updateAgentAvatarUrlByUserId(userId, avatarUrl)
 
-        imageInfoMessageQueue.deleteImages(listOf(originalAvatarUrl))
-        imageInfoMessageQueue.confirmImagesUploaded(listOf(avatarUrl))
+        imageInfoMessageQueue.deleteImage(originalAvatarUrl)
+        imageInfoMessageQueue.confirmImageUploaded(avatarUrl)
 
-        return success()
+        return success("detail", agent)
     }
 }

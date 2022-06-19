@@ -1,8 +1,10 @@
 package com.leader.marketcloudapi.controller.project
 
 import com.leader.marketcloudapi.data.project.Project
+import com.leader.marketcloudapi.mq.ImageInfoMessageQueue
 import com.leader.marketcloudapi.service.context.ContextService
 import com.leader.marketcloudapi.service.project.ProjectService
+import com.leader.marketcloudapi.util.InternalErrorException
 import com.leader.marketcloudapi.util.isRequiredArgument
 import com.leader.marketcloudapi.util.success
 import org.bson.Document
@@ -17,12 +19,17 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/project/manage")
 class ProjectManageController @Autowired constructor(
     private val projectService: ProjectService,
-    private val contextService: ContextService
+    private val contextService: ContextService,
+    private val imageInfoMessageQueue: ImageInfoMessageQueue
 ) {
     class QueryObject {
         var projectId: ObjectId? = null
         var info: Project? = null
     }
+
+    private fun String.setMinus(other: String) = if (this == other) listOf(this) else listOf()
+
+    private fun List<String>.setMinus(other: List<String>) = this.filter { !other.contains(it) }
 
     @PostMapping("/list")
     fun getProjectList(): Document {
@@ -34,16 +41,35 @@ class ProjectManageController @Autowired constructor(
     fun publishProject(@RequestBody queryObject: QueryObject): Document {
         val agentId = contextService.agentId
         val info = queryObject.info.isRequiredArgument("info")
-        projectService.publishProject(agentId, info)
-        return success()
+
+        val newImages = listOf(info.coverUrl) + info.imageUrls
+        imageInfoMessageQueue.assertImagesUploaded(newImages)
+
+        val project = projectService.publishProject(agentId, info)
+
+        imageInfoMessageQueue.confirmImagesUploaded(newImages)
+
+        return success("detail", projectService.getProjectDetail(project.id))
     }
 
     @PostMapping("/update")
     fun updateProject(@RequestBody queryObject: QueryObject): Document {
         val agentId = contextService.agentId
         val info = queryObject.info.isRequiredArgument("info")
-        projectService.updateProject(agentId, info)
-        return success()
+
+        val originalProject = projectService.getProjectDetail(info.id)
+            ?: throw InternalErrorException("Project not found")
+        val newImages = info.coverUrl.setMinus(originalProject.coverUrl) + info.imageUrls.setMinus(originalProject.imageUrls)
+        val oldImages = originalProject.coverUrl.setMinus(info.coverUrl) + originalProject.imageUrls.setMinus(info.imageUrls)
+
+        imageInfoMessageQueue.assertImagesUploaded(newImages)
+
+        val project = projectService.updateProject(agentId, info)
+
+        imageInfoMessageQueue.deleteImages(oldImages)
+        imageInfoMessageQueue.confirmImagesUploaded(newImages)
+
+        return success("detail", projectService.getProjectDetail(project.id))
     }
 
     @PostMapping("/drafts")

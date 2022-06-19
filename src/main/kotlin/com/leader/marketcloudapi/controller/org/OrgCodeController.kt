@@ -21,43 +21,48 @@ class OrgCodeController @Autowired constructor(
     private val contextService: ContextService
 ) {
 
+    class QueryObject {
+        var opcode: String? = null
+        var expiresIn: Long? = null
+    }
+
     @PostMapping("/get-join")
-    fun getOrganizationJoinCode(@RequestBody queryObject: OrgManageController.QueryObject): Document {
+    fun getOrganizationJoinCode(@RequestBody queryObject: QueryObject): Document {
         val memberId = contextService.memberId
         orgMemberService.assertIsAdmin(memberId)
 
         val orgId = contextService.orgId
         val expiresIn = queryObject.expiresIn.isRequiredArgument("expiresIn")
-        val ocode = orgCodeService.generateJoinCode(orgId, expiresIn)
+        val opcode = orgCodeService.generateJoinCode(orgId, expiresIn)
 
-        return success("ocode", ocode)
+        return success("opcode", opcode)
     }
 
     @PostMapping("/get-transfer")
-    fun getOrganizationTransferCode(@RequestBody queryObject: OrgManageController.QueryObject): Document {
+    fun getOrganizationTransferCode(@RequestBody queryObject: QueryObject): Document {
         val memberId = contextService.memberId
         orgMemberService.assertIsAdmin(memberId)
 
         val orgId = contextService.orgId
         val expiresIn = queryObject.expiresIn.isRequiredArgument("expiresIn")
-        val ocode = orgCodeService.generateTransferAdminCode(orgId, memberId, expiresIn)
+        val opcode = orgCodeService.generateTransferAdminCode(orgId, memberId, expiresIn)
 
-        return success("ocode", ocode)
+        return success("opcode", opcode)
     }
 
     @PostMapping("/info")
-    fun getCodeInfo(@RequestBody queryObject: OrgManageController.QueryObject): Document {
-        val ocode = queryObject.ocode.isRequiredArgument("ocode")
-        val info = orgCodeService.getCodeInfo(ocode)
+    fun getCodeInfo(@RequestBody queryObject: QueryObject): Document {
+        val opcode = queryObject.opcode.isRequiredArgument("opcode")
+        val info = orgCodeService.getCodeInfo(opcode)
         return success("info", info)
     }
 
     @PostMapping("/join")
-    fun joinOrganization(@RequestBody queryObject: OrgManageController.QueryObject): Document {
+    fun joinOrganization(@RequestBody queryObject: QueryObject): Document {
         val agentId = contextService.agentId
 
-        val ocode = queryObject.ocode.isRequiredArgument("ocode")
-        val info = orgCodeService.getCodeInfo(ocode)
+        val opcode = queryObject.opcode.isRequiredArgument("opcode")
+        val info = orgCodeService.getCodeInfo(opcode)
         if (info.type != OrgCodeService.JOIN_CODE_TYPE) {
             throw InternalErrorException("Code type is not join.")
         }
@@ -67,13 +72,13 @@ class OrgCodeController @Autowired constructor(
     }
 
     @PostMapping("/claim-admin")
-    fun claimOrganization(@RequestBody queryObject: OrgManageController.QueryObject): Document {
+    fun claimOrganization(@RequestBody queryObject: QueryObject): Document {
         val agentId = contextService.agentId
 
-        val ocode = queryObject.ocode.isRequiredArgument("ocode")
-        val info = orgCodeService.getCodeInfo(ocode)
+        val opcode = queryObject.opcode.isRequiredArgument("opcode")
+        val info = orgCodeService.getCodeInfo(opcode)
         if (info.type != OrgCodeService.TRANSFER_ADMIN_CODE_TYPE) {
-            throw InternalErrorException("Code type is not join.")
+            throw InternalErrorException("Code type is not claim.")
         }
         val memberId = if (orgMemberService.isMemberOf(info.orgId, agentId)) {
             orgMemberService.getMemberId(info.orgId, agentId)!!
@@ -81,7 +86,7 @@ class OrgCodeController @Autowired constructor(
             orgMemberService.addMember(info.orgId, agentId).id
         }
         orgMemberService.transferAdmin(info.oldAdminMemberId!!, memberId)
-        orgCodeService.deleteCode(ocode)
+        orgCodeService.deleteCode(opcode)
 
         return success()
     }

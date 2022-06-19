@@ -34,13 +34,15 @@ interface AgentInterestRepository : MongoRepository<AgentInterest, ObjectId> {
             }
         """,
         """
-            { ${"$"}unwind: "${'$'}agentInfo" }
+            { ${"$"}unwind: "${"$"}agentInfo" }
         """,
         """
             { ${"$"}replaceRoot: { newRoot: '${"$"}agentInfo' } }
         """
     ])
     fun lookupByQuery(query: org.bson.Document): List<Agent>
+
+    fun existsByAgentIdAndInterestAgentId(agentId: ObjectId, interestAgentId: ObjectId): Boolean
 }
 
 fun AgentInterestRepository.lookupByAgentId(agentId: ObjectId): List<Agent> {

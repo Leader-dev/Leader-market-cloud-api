@@ -37,6 +37,9 @@ class ContextService @Autowired constructor(
             return agentService.createIfNotExists(userId).id
         }
 
+    val agentIdOrNull: ObjectId?
+        get() = if (hasUserId) { agentId } else { null }
+
     var orgId: ObjectId
         get() {
             if (!volatileThreadData.containsKey(ORG_ID_KEY)) {

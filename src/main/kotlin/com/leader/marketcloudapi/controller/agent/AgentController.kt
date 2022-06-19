@@ -1,6 +1,7 @@
 package com.leader.marketcloudapi.controller.agent
 
 import com.leader.marketcloudapi.service.agent.AgentService
+import com.leader.marketcloudapi.service.context.ContextService
 import com.leader.marketcloudapi.util.isRequiredArgument
 import com.leader.marketcloudapi.util.success
 import org.bson.Document
@@ -14,7 +15,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/agent")
 class AgentController @Autowired constructor(
-    private val agentService: AgentService
+    private val agentService: AgentService,
+    private val contextService: ContextService
 ) {
 
     class QueryObject {
@@ -23,12 +25,12 @@ class AgentController @Autowired constructor(
 
     @PostMapping("/list")
     fun getAllAgents(): Document {
-        return success("list", agentService.listAgents())
+        return success("list", agentService.listAgents(contextService.agentIdOrNull))
     }
 
     @PostMapping("/detail")
     fun getAgentInfo(@RequestBody queryObject: QueryObject): Document {
         val agentId = queryObject.agentId.isRequiredArgument("agentId")
-        return success("detail", agentService.getAgentInfo(agentId))
+        return success("detail", agentService.getAgentInfo(agentId, contextService.agentIdOrNull))
     }
 }

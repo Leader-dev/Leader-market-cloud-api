@@ -52,7 +52,7 @@ class ProjectController @Autowired constructor(
     @PostMapping("/read")
     fun incrementReadCount(@RequestBody queryObject: QueryObject): Document {
         val projectId = queryObject.projectId.isRequiredArgument("projectId")
-        projectService.incrementReadCount(projectId)
-        return success()
+        val count = projectService.incrementReadCount(projectId)
+        return success("count", count)
     }
 }
