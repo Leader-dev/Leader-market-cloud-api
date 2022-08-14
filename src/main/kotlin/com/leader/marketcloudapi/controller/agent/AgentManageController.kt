@@ -49,20 +49,11 @@ class AgentManageController @Autowired constructor(
         val info = queryObject.info.isRequiredArgument("info")
         val userId = contextService.userId  // use user id for performance
         info.orgId?.let {
-            orgMemberService.assertIsMember(it, contextService.agentId)
+            if (!orgMemberService.isMemberOf(it, userId)) {
+                throw InternalErrorException("User not in organization.")
+            }
         }
         val agent = agentService.updateAgentInfoByUserId(userId, info)
-        return success("detail", agent)
-    }
-
-    @PostMapping("/info/update/orgId")
-    fun updateAgentOrgId(@RequestBody queryObject: QueryObject): Document {
-        val orgId = queryObject.orgId.isRequiredArgument("orgId")
-        val userId = contextService.userId  // use user id for performance
-        if (agentService.getAgentIdByUserId(userId) == null) {
-            throw InternalErrorException("User not in organization.")
-        }
-        val agent = agentService.updateAgentOrgIdByUserId(userId, orgId)
         return success("detail", agent)
     }
 

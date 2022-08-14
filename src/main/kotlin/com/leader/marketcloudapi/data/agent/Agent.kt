@@ -23,11 +23,7 @@ class Agent() {
     var name: String = ""
     var description: String = ""
 
-    var showContact: Boolean = true
-    var phone: String = ""
-    var email: String = ""
-
-    var avatarUrl: String = ""
+    var avatarUrl: String? = null
 }
 
 class AgentSummary {
@@ -41,11 +37,7 @@ class AgentSummary {
     var name: String = ""
     var description: String = ""
 
-    var showContact: Boolean = true
-    var phone: String = ""
-    var email: String = ""
-
-    var avatarUrl: String = ""
+    var avatarUrl: String? = null
 
     lateinit var projects: List<Project>
     var favorited: Boolean = false
@@ -55,8 +47,6 @@ class AgentSummary {
 }
 
 interface AgentRepository : MongoRepository<Agent, ObjectId> {
-
-    fun existsByUserId(userId: ObjectId): Boolean
 
     fun findByUserId(userId: ObjectId): Agent?
 

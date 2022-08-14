@@ -20,7 +20,10 @@ class ImageInfoMessageQueue @Autowired constructor(
     @Bean
     fun imageUploadedQueue() = Queue(IMAGE_UPLOADED)
 
-    fun assertImageUploaded(imageUrl: String) {
+    fun assertImageUploaded(imageUrl: String?) {
+        if (imageUrl == null) {
+            return
+        }
         assertImagesUploaded(listOf(imageUrl))
     }
 
@@ -32,7 +35,10 @@ class ImageInfoMessageQueue @Autowired constructor(
         }
     }
 
-    fun confirmImageUploaded(imageUrl: String) {
+    fun confirmImageUploaded(imageUrl: String?) {
+        if (imageUrl == null) {
+            return
+        }
         confirmImagesUploaded(listOf(imageUrl))
     }
 
@@ -44,7 +50,10 @@ class ImageInfoMessageQueue @Autowired constructor(
         }
     }
 
-    fun deleteImage(imageUrl: String) {
+    fun deleteImage(imageUrl: String?) {
+        if (imageUrl == null) {
+            return
+        }
         deleteImages(listOf(imageUrl))
     }
 

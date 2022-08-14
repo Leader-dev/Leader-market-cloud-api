@@ -62,8 +62,14 @@ class OrgManageController @Autowired constructor(
         val agentId = contextService.agentId
 
         val info = queryObject.info.isRequiredArgument("info")
+
+        val avatarUrl = info.avatarUrl
+        imageInfoMessageQueue.assertImageUploaded(avatarUrl)
+
         val org = organizationService.createOrganization(info)
         orgMemberService.addAdmin(org.id, agentId)
+
+        imageInfoMessageQueue.confirmImageUploaded(avatarUrl)
 
         return success("detail", organizationService.getOrganization(org.id))
     }

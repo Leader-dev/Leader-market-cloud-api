@@ -6,6 +6,7 @@ import com.leader.marketcloudapi.service.context.ContextService
 import com.leader.marketcloudapi.service.project.ProjectService
 import com.leader.marketcloudapi.util.InternalErrorException
 import com.leader.marketcloudapi.util.isRequiredArgument
+import com.leader.marketcloudapi.util.setMinus
 import com.leader.marketcloudapi.util.success
 import org.bson.Document
 import org.bson.types.ObjectId
@@ -26,10 +27,6 @@ class ProjectManageController @Autowired constructor(
         var projectId: ObjectId? = null
         var info: Project? = null
     }
-
-    private fun String.setMinus(other: String) = if (this == other) listOf(this) else listOf()
-
-    private fun List<String>.setMinus(other: List<String>) = this.filter { !other.contains(it) }
 
     @PostMapping("/list")
     fun getProjectList(): Document {

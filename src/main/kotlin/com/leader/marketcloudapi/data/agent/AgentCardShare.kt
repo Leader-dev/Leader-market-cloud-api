@@ -6,23 +6,28 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.Aggregation
 import org.springframework.data.mongodb.repository.MongoRepository
 
-@Document(collection = "agent_interests")
-class AgentInterest() {
+@Document(collection = "agent_card_share")
+class AgentCardShare() {
 
-    constructor(agentId: ObjectId, interestAgentId: ObjectId) : this() {
+    constructor(agentId: ObjectId, targetAgentId: ObjectId, cardId: ObjectId) : this() {
         this.agentId = agentId
-        this.interestAgentId = interestAgentId
+        this.targetAgentId = targetAgentId
+        this.cardId = cardId
     }
 
     @Id
     lateinit var id: ObjectId
     lateinit var agentId: ObjectId  // agent who interests other
-    lateinit var interestAgentId: ObjectId  // agent who is being interested
+    lateinit var targetAgentId: ObjectId  // agent who is being interested
+    lateinit var cardId: ObjectId  // card id
 }
 
-interface AgentInterestRepository : MongoRepository<AgentInterest, ObjectId> {
+interface AgentCardShareRepository : MongoRepository<AgentCardShare, ObjectId> {
 
     @Aggregation(pipeline = [
+        """
+            { ${"$"}match: ?0 }
+        """,
         """
             {
                 ${"$"}lookup: {
@@ -42,13 +47,16 @@ interface AgentInterestRepository : MongoRepository<AgentInterest, ObjectId> {
     ])
     fun lookupByQuery(query: org.bson.Document): List<Agent>
 
-    fun existsByAgentIdAndInterestAgentId(agentId: ObjectId, interestAgentId: ObjectId): Boolean
+    fun existsByAgentIdAndTargetAgentId(agentId: ObjectId, targetAgentId: ObjectId): Boolean
 }
 
-fun AgentInterestRepository.lookupByAgentId(agentId: ObjectId): List<Agent> {
+fun AgentCardShareRepository.lookupByAgentId(agentId: ObjectId): List<Agent> {
     return lookupByQuery(org.bson.Document("agentId", agentId))
 }
 
-fun AgentInterestRepository.lookupByInterestAgentId(interestAgentId: ObjectId): List<Agent> {
-    return lookupByQuery(org.bson.Document("interestAgentId", interestAgentId))
+fun AgentCardShareRepository.lookupByAgentIdOrTargetAgentId(targetAgentId: ObjectId): List<Agent> {
+    return lookupByQuery(org.bson.Document("\$or", listOf(
+        org.bson.Document("agentId", targetAgentId),
+        org.bson.Document("targetAgentId", targetAgentId)
+    )))
 }
